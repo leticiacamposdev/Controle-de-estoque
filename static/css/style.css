@@ -1,0 +1,142 @@
+/* ============================================================
+   style.css — Estilos Customizados do SistEstoque
+   Complementam o Bootstrap 5, sem sobrescrever o essencial.
+   ============================================================ */
+
+/* --- Layout Geral --- */
+body {
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Empurra o rodapé para o fundo mesmo com pouco conteúdo */
+.container {
+    flex: 1;
+}
+
+/* --- Navbar --- */
+.navbar-brand {
+    font-size: 1.35rem;
+    letter-spacing: 0.5px;
+}
+
+.navbar .nav-link {
+    padding-right: 1rem !important;
+    padding-left: 1rem !important;
+    transition: background-color 0.2s ease;
+    border-radius: 4px;
+}
+
+.navbar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* --- Cards --- */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card .card-header {
+    font-weight: 600;
+}
+
+/* Cards de métricas no dashboard */
+.card.bg-primary,
+.card.bg-success,
+.card.bg-danger {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card.bg-primary:hover,
+.card.bg-success:hover,
+.card.bg-danger:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* --- Tabelas --- */
+.table th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Destaque de linha para estoque baixo */
+.table-warning td {
+    background-color: #fff3cd !important;
+}
+
+/* --- Badges de Estoque --- */
+.badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* --- Formulários --- */
+.form-control:focus,
+.form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.2);
+}
+
+.form-label {
+    margin-bottom: 0.3rem;
+}
+
+/* --- Botões --- */
+.btn {
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.btn-lg {
+    padding: 0.6rem 1.5rem;
+}
+
+/* --- Paginação --- */
+.pagination .page-link {
+    color: #0d6efd;
+    border-radius: 6px;
+    margin: 0 2px;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+/* --- Rodapé --- */
+.footer {
+    margin-top: auto;
+}
+
+/* --- Ícones em display grande (página vazia) --- */
+.display-1.text-muted,
+.display-1.text-success {
+    opacity: 0.5;
+}
+
+/* --- Código inline (SKU) --- */
+code {
+    color: #d63384;
+    background-color: #f8f0f5;
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
+    font-size: 0.88em;
+}
+
+/* --- Alertas --- */
+.alert {
+    border-radius: 8px;
+    border-left: 4px solid;
+}
+
+.alert-success { border-left-color: #198754; }
+.alert-danger  { border-left-color: #dc3545; }
+.alert-warning { border-left-color: #ffc107; }
+.alert-info    { border-left-color: #0dcaf0; }
