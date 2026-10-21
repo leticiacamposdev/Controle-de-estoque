@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS produtos (
     data_adicao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-# NOT NULL -> Precisa ser preenchido, não pode ser um campo vazio.
-# CURRENT_TEIMSTAMP -> Adiciona a data que foi inserido automaticamente
+-- NOT NULL -> Precisa ser preenchido, não pode ser um campo vazio.
+-- REAL -> É número real, sendo um float
+-- CURRENT_TEIMSTAMP -> Adiciona a data que foi inserido automaticamente.

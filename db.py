@@ -1,33 +1,47 @@
 import sqlite3
 
 DATABASE = 'estoque.db'
-LIMIAR_ESTOQUE_BAIXO = 10
+LIMIAR_ESTOQUE_BAIXO = 10 
 
 def get_db_connection():
+
+    """ Função utilizada para se conectar com o banco de dados.
+    """
     conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
+    conn.row_factory = sqlite3.Row # Para acessar a tabela/coluna do nosso banco de dados pelo nome. 
     return conn
 
 def init_db():
+
+    """ Função para iniciar a tabela do schema.
+    """
     conn = get_db_connection()
-    with open('schema.sql', 'r', encoding='utf-8') as f:
-        conn.executescript(f.read())
+    with open('schema.sql', 'r', encoding='utf-8') as f: # r= read
+        conn.executescript(f.read()) # Para criar a tabela.
     conn.commit()
     conn.close()
     print('Banco de dados inicializado!')
+
+# Métodos CRUDE: (usando quarys)
+# Create, método responsável por criar os produtos.
+# Read, método responsável por ler os produtos.
+# Update, método responsável por atualizar os produtos existentes.
+# Delete, método responsável por deletar os produtos existentes.
     
 # --------------------------------------------------------------
 # PRODUTOS
 # --------------------------------------------------------------
 def criar_produto(nome, sku, descricao, preco, quantidade, localizacao):
-    conn = get_db_connection()
+    """ Função criada para receber as informações do produto e inserir no banco de dados.
+    """
+    conn = get_db_connection() # Para abrir o banco de dados.
     conn.execute(
         '''INSERT INTO produtos (nome, sku, descricao, preco, quantidade, localizacao)
            VALUES (?, ?, ?, ?, ?, ?)''',
         (nome, sku, descricao, preco, quantidade, localizacao)
     )
-    conn.commit()
-    conn.close()
+    conn.commit() # Para confirmar a execução da ação no banco de dados.
+    conn.close() # Para fechar o banco de dados.
     
 def atualizar_produto(produto_id, nome, sku, descricao, preco, quantidade, localizacao):
     """Atualiza todos os campos editáveis de um produto existente."""
@@ -65,13 +79,14 @@ def get_todos_produtos(busca=None, pagina=1, por_pagina=10):
             '''SELECT * FROM produtos
                WHERE nome LIKE ? OR sku LIKE ?
                ORDER BY nome ASC
-               LIMIT ? OFFSET ?''',
+               LIMIT ? OFFSET ?''', # * Significa de todos
+               # ASC significa ascendente, em ordem alfabética.
             (filtro, filtro, por_pagina, offset)
-        ).fetchall()
+        ).fetchall() # Traz todos os resultados.
         total = conn.execute(
             'SELECT COUNT(*) FROM produtos WHERE nome LIKE ? OR sku LIKE ?',
             (filtro, filtro)
-        ).fetchone()[0]
+        ).fetchone()[0] # Traz o primeiro resultado, na primeira posição.
     else:
         produtos = conn.execute(
             'SELECT * FROM produtos ORDER BY nome ASC LIMIT ? OFFSET ?',
