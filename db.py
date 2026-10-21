@@ -114,8 +114,7 @@ def get_produto_por_sku(sku, excluir_id=None):
     excluir_id é usado na edição: ignoramos o próprio produto
     ao checar duplicata de SKU.
 
-    :return: Produto encontrado ou None   
-    
+    :return: Produto encontrado ou None.    
     """
     conn = get_db_connection()
     if excluir_id:
