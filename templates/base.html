@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    {# O bloco 'titulo' é substituído por cada template filho #}
+    <title>{% block titulo %}Estoque{% endblock %} | SistEstoque</title>
+
+    {# Bootstrap 5 — framework CSS via CDN (sem precisar instalar nada) #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    {# Bootstrap Icons — biblioteca de ícones SVG #}
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    {# Nosso CSS customizado #}
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+    {# ===== BARRA DE NAVEGAÇÃO ===== #}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand fw-bold" href="{{ url_for('main.dashboard') }}">
+                <i class="bi bi-box-seam-fill text-warning"></i> SistEstoque
+            </a>
+
+            {# Botão hamburguer para mobile #}
+            <button class="navbar-toggler" type="button"
+                    data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                    aria-controls="navbarNav" aria-expanded="false"
+                    aria-label="Alternar navegação">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+                            <i class="bi bi-speedometer2"></i> Painel
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.lista_produtos') }}">
+                            <i class="bi bi-list-ul"></i> Produtos
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.adicionar_produto') }}">
+                            <i class="bi bi-plus-circle"></i> Novo Produto
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('main.relatorio_estoque_baixo') }}">
+                            <i class="bi bi-exclamation-triangle-fill text-warning"></i> Estoque Baixo
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {# ===== CONTEÚDO PRINCIPAL ===== #}
+    <div class="container mt-4 mb-5">
+
+        {# Flash Messages — aparecem aqui em todas as páginas #}
+        {# with_categories=true faz o Flask retornar tuplas (categoria, mensagem) #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for categoria, mensagem in messages %}
+                    <div class="alert alert-{{ categoria }} alert-dismissible fade show" role="alert">
+                        {% if categoria == 'success' %}
+                            <i class="bi bi-check-circle-fill"></i>
+                        {% elif categoria == 'danger' %}
+                            <i class="bi bi-x-circle-fill"></i>
+                        {% else %}
+                            <i class="bi bi-info-circle-fill"></i>
+                        {% endif %}
+                        {{ mensagem }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Fechar"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {# Bloco principal — substituído por cada template filho #}
+        {% block conteudo %}{% endblock %}
+    </div>
+
+    {# ===== RODAPÉ ===== #}
+    <footer class="footer py-3 bg-dark text-center">
+        <span class="text-muted">
+            SistEstoque &copy; 2024 &mdash; Desenvolvido ao vivo no
+            <strong class="text-light">Código de Segunda</strong>
+        </span>
+    </footer>
+
+    {# Bootstrap 5 JS (bundle inclui o Popper.js necessário para modais) #}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    {# Bloco para scripts específicos de cada página #}
+    {% block scripts %}{% endblock %}
+</body>
+</html>
