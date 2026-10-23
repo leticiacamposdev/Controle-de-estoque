@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Relatório: Estoque Baixo{% endblock %}
+
+{% block conteudo %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">
+        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+        Relatório de Estoque Baixo
+    </h1>
+    <a href="{{ url_for('main.lista_produtos') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+{# Contexto do relatório #}
+<div class="alert alert-warning d-flex align-items-center gap-2 mb-4" role="alert">
+    <i class="bi bi-info-circle-fill fs-5"></i>
+    <div>
+        Este relatório mostra todos os produtos com estoque abaixo de
+        <strong>{{ limiar }} unidades</strong>.
+        Total de itens críticos:
+        <span class="badge bg-danger fs-6">{{ produtos|length }}</span>
+    </div>
+</div>
+
+{% if produtos %}
+
+{# ===== TABELA DO RELATÓRIO ===== #}
+<div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle">
+        <thead class="table-danger">
+            <tr>
+                <th>Produto</th>
+                <th>SKU</th>
+                <th class="text-center">Preço Unit.</th>
+                <th class="text-center">Estoque Atual</th>
+                <th class="text-center">Faltam para o mínimo</th>
+                <th>Localização</th>
+                <th class="text-center">Ação</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+            <tr>
+                <td class="fw-semibold">{{ produto['nome'] }}</td>
+                <td><code>{{ produto['sku'] }}</code></td>
+                <td class="text-center">R$ {{ "%.2f"|format(produto['preco']) }}</td>
+                <td class="text-center">
+                    {# Quanto menor o estoque, mais crítico (vermelho mais forte) #}
+                    {% if produto['quantidade'] == 0 %}
+                        <span class="badge bg-dark fs-6">
+                            <i class="bi bi-slash-circle"></i> Zerado
+                        </span>
+                    {% else %}
+                        <span class="badge bg-danger fs-6">
+                            {{ produto['quantidade'] }} un.
+                        </span>
+                    {% endif %}
+                </td>
+                <td class="text-center">
+                    {# Calcula quantas unidades faltam para atingir o limiar mínimo #}
+                    {% set faltam = limiar - produto['quantidade'] %}
+                    <span class="text-danger fw-bold">+ {{ faltam }} un.</span>
+                </td>
+                <td>{{ produto['localizacao'] or '—' }}</td>
+                <td class="text-center">
+                    <a href="{{ url_for('main.transacao_estoque', id=produto['id']) }}"
+                       class="btn btn-sm btn-success">
+                        <i class="bi bi-plus-circle-fill"></i> Repor
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{# ===== RESUMO DO RELATÓRIO ===== #}
+<div class="card mt-4 border-secondary">
+    <div class="card-header fw-semibold">
+        <i class="bi bi-bar-chart-fill"></i> Resumo do Relatório
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-4">
+                <p class="text-muted small mb-1">Total de Itens Críticos</p>
+                <p class="display-6 fw-bold text-danger">{{ produtos|length }}</p>
+            </div>
+            <div class="col-md-4">
+                <p class="text-muted small mb-1">Produtos com Estoque Zerado</p>
+                {# Loop dentro do template para contar os zerados #}
+                {% set zerados = [] %}
+                {% for p in produtos %}
+                    {% if p['quantidade'] == 0 %}
+                        {% if zerados.append(1) %}{% endif %}
+                    {% endif %}
+                {% endfor %}
+                <p class="display-6 fw-bold text-dark">{{ zerados|length }}</p>
+            </div>
+            <div class="col-md-4">
+                <p class="text-muted small mb-1">Limite Configurado</p>
+                <p class="display-6 fw-bold text-warning">{{ limiar }} un.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+
+{# Estado positivo #}
+<div class="text-center py-5">
+    <i class="bi bi-patch-check display-1 text-success"></i>
+    <p class="lead text-success mt-3 fw-bold">
+        Estoque em dia! Nenhum produto abaixo de {{ limiar }} unidades.
+    </p>
+    <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">
+        <i class="bi bi-speedometer2"></i> Voltar ao Painel
+    </a>
+</div>
+
+{% endif %}
+
+{% endblock %}

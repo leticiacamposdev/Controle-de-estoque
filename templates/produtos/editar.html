@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Editar: {{ produto['nome'] }}{% endblock %}
+
+{% block conteudo %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">
+        <i class="bi bi-pencil-fill text-primary"></i> Editar Produto
+    </h1>
+    <a href="{{ url_for('main.lista_produtos') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+{# Cartão informativo mostrando qual produto está sendo editado #}
+<div class="alert alert-info d-flex align-items-center gap-2 mb-4" role="alert">
+    <i class="bi bi-info-circle-fill fs-5"></i>
+    <div>
+        Editando: <strong>{{ produto['nome'] }}</strong> &mdash;
+        SKU: <code>{{ produto['sku'] }}</code> &mdash;
+        Estoque atual:
+        <span class="badge {% if produto['quantidade'] < 10 %}bg-danger{% else %}bg-success{% endif %}">
+            {{ produto['quantidade'] }} un.
+        </span>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-body p-4">
+        {# O action inclui o ID do produto para a rota saber qual atualizar #}
+        <form method="POST" action="{{ url_for('main.editar_produto', id=produto['id']) }}" novalidate>
+
+            <div class="row g-3">
+
+                <div class="col-md-8">
+                    <label for="nome" class="form-label fw-semibold">
+                        Nome do Produto <span class="text-danger">*</span>
+                    </label>
+                    <input type="text"
+                           class="form-control"
+                           id="nome"
+                           name="nome"
+                           value="{{ form_data['nome'] }}"
+                           required>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="sku" class="form-label fw-semibold">
+                        SKU (Código) <span class="text-danger">*</span>
+                    </label>
+                    <input type="text"
+                           class="form-control text-uppercase"
+                           id="sku"
+                           name="sku"
+                           value="{{ form_data['sku'] }}"
+                           required>
+                </div>
+
+                <div class="col-12">
+                    <label for="descricao" class="form-label fw-semibold">
+                        Descrição <span class="text-muted fw-normal">(opcional)</span>
+                    </label>
+                    <textarea class="form-control"
+                              id="descricao"
+                              name="descricao"
+                              rows="3">{{ form_data['descricao'] or '' }}</textarea>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="preco" class="form-label fw-semibold">
+                        Preço Unitário (R$) <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text">R$</span>
+                        <input type="number"
+                               class="form-control"
+                               id="preco"
+                               name="preco"
+                               step="0.01"
+                               min="0"
+                               value="{{ form_data['preco'] }}"
+                               required>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="quantidade" class="form-label fw-semibold">
+                        Quantidade <span class="text-danger">*</span>
+                    </label>
+                    <input type="number"
+                           class="form-control"
+                           id="quantidade"
+                           name="quantidade"
+                           min="0"
+                           value="{{ form_data['quantidade'] }}"
+                           required>
+                    <div class="form-text">
+                        Para ajustes rápidos, prefira usar
+                        <a href="{{ url_for('main.transacao_estoque', id=produto['id']) }}">
+                            Registrar Movimentação
+                        </a>.
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="localizacao" class="form-label fw-semibold">
+                        Localização <span class="text-muted fw-normal">(opcional)</span>
+                    </label>
+                    <input type="text"
+                           class="form-control"
+                           id="localizacao"
+                           name="localizacao"
+                           placeholder="Ex: Corredor 3, Prateleira B"
+                           value="{{ form_data['localizacao'] or '' }}">
+                </div>
+
+                <div class="col-12 pt-2 border-top mt-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle-fill"></i> Salvar Alterações
+                    </button>
+                    <a href="{{ url_for('main.lista_produtos') }}"
+                       class="btn btn-outline-secondary btn-lg ms-2">
+                        Cancelar
+                    </a>
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
