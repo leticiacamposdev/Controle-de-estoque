@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Movimentar Estoque — {{ produto['nome'] }}{% endblock %}
+
+{% block conteudo %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">
+        <i class="bi bi-arrow-left-right text-primary"></i> Movimentar Estoque
+    </h1>
+    <a href="{{ url_for('main.lista_produtos') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Voltar
+    </a>
+</div>
+
+{# ===== INFORMAÇÕES DO PRODUTO ===== #}
+<div class="card border-primary mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <span class="fw-bold fs-5">{{ produto['nome'] }}</span>
+        <code class="text-white-50">{{ produto['sku'] }}</code>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p class="mb-1">
+                    <strong>Estoque Atual:</strong>
+                    <span class="badge fs-5
+                        {% if produto['quantidade'] < 10 %}bg-danger
+                        {% elif produto['quantidade'] < 20 %}bg-warning text-dark
+                        {% else %}bg-success{% endif %}">
+                        {{ produto['quantidade'] }} unidades
+                    </span>
+                </p>
+                {% if produto['descricao'] %}
+                    <p class="text-muted mb-0 small">{{ produto['descricao'] }}</p>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                {% if produto['localizacao'] %}
+                    <p class="mb-1">
+                        <i class="bi bi-geo-alt-fill text-muted"></i>
+                        <strong>Localização:</strong> {{ produto['localizacao'] }}
+                    </p>
+                {% endif %}
+                <p class="mb-0">
+                    <i class="bi bi-tag-fill text-muted"></i>
+                    <strong>Preço Unitário:</strong> R$ {{ "%.2f"|format(produto['preco']) }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ===== FORMULÁRIOS DE TRANSAÇÃO (lado a lado) ===== #}
+<div class="row g-4">
+
+    {# --- ENTRADA: Recebimento de Mercadoria --- #}
+    <div class="col-md-6">
+        <div class="card border-success h-100 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <i class="bi bi-box-arrow-in-down-right fs-5"></i>
+                <strong>Entrada de Estoque</strong>
+                <div class="small opacity-75">Recebimento / Compra / Devolução</div>
+            </div>
+            <div class="card-body">
+                {# Dois formulários na mesma página; cada um tem seu próprio campo 'tipo' oculto #}
+                <form method="POST">
+                    <input type="hidden" name="tipo" value="entrada">
+
+                    <label for="qtd-entrada" class="form-label">
+                        Quantidade a adicionar ao estoque:
+                    </label>
+                    <div class="input-group input-group-lg mb-3">
+                        <span class="input-group-text bg-success text-white">
+                            <i class="bi bi-plus-lg"></i>
+                        </span>
+                        <input type="number"
+                               class="form-control"
+                               id="qtd-entrada"
+                               name="quantidade"
+                               min="1"
+                               placeholder="0"
+                               required>
+                        <span class="input-group-text">un.</span>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Confirmar Entrada
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-muted small">
+                <i class="bi bi-info-circle"></i>
+                O estoque aumentará em X unidades.
+            </div>
+        </div>
+    </div>
+
+    {# --- SAÍDA: Venda / Consumo --- #}
+    <div class="col-md-6">
+        <div class="card border-danger h-100 shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-box-arrow-up-right fs-5"></i>
+                <strong>Saída de Estoque</strong>
+                <div class="small opacity-75">Venda / Consumo / Perda</div>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <input type="hidden" name="tipo" value="saida">
+
+                    <label for="qtd-saida" class="form-label">
+                        Quantidade a retirar do estoque:
+                    </label>
+                    <div class="input-group input-group-lg mb-1">
+                        <span class="input-group-text bg-danger text-white">
+                            <i class="bi bi-dash-lg"></i>
+                        </span>
+                        <input type="number"
+                               class="form-control"
+                               id="qtd-saida"
+                               name="quantidade"
+                               min="1"
+                               max="{{ produto['quantidade'] }}"
+                               placeholder="0"
+                               required>
+                        <span class="input-group-text">un.</span>
+                    </div>
+                    <div class="form-text text-danger mb-3">
+                        <i class="bi bi-exclamation-circle"></i>
+                        Disponível: <strong>{{ produto['quantidade'] }}</strong> unidades.
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-danger btn-lg"
+                                {% if produto['quantidade'] == 0 %}disabled{% endif %}>
+                            <i class="bi bi-dash-circle-fill"></i>
+                            Confirmar Saída
+                        </button>
+                    </div>
+
+                    {% if produto['quantidade'] == 0 %}
+                    <div class="alert alert-warning mt-3 mb-0 py-2">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        Sem estoque disponível para saída.
+                    </div>
+                    {% endif %}
+                </form>
+            </div>
+            <div class="card-footer text-muted small">
+                <i class="bi bi-info-circle"></i>
+                O sistema impedirá saída maior que o estoque atual.
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}
