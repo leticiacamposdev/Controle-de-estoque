@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Produtos{% endblock %}
+
+{% block conteudo %}
+
+{# ===== CABEÇALHO ===== #}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">
+        <i class="bi bi-list-ul text-primary"></i> Produtos
+        <span class="badge bg-secondary fs-6 align-middle">{{ total }}</span>
+    </h1>
+    <a href="{{ url_for('main.adicionar_produto') }}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Novo Produto
+    </a>
+</div>
+
+{# ===== BARRA DE PESQUISA ===== #}
+{# method="GET" coloca os parâmetros na URL: /produtos?q=teclado #}
+<form class="mb-4" method="GET" action="{{ url_for('main.lista_produtos') }}">
+    <div class="input-group">
+        <span class="input-group-text"><i class="bi bi-search"></i></span>
+        <input type="text" class="form-control" name="q"
+               placeholder="Pesquisar por nome ou SKU..."
+               value="{{ busca }}"
+               autocomplete="off">
+        <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+        {% if busca %}
+            {# Botão para limpar a pesquisa — volta para a lista sem filtro #}
+            <a href="{{ url_for('main.lista_produtos') }}" class="btn btn-outline-danger" title="Limpar pesquisa">
+                <i class="bi bi-x-lg"></i> Limpar
+            </a>
+        {% endif %}
+    </div>
+</form>
+
+{% if busca %}
+    <p class="text-muted mb-3">
+        <i class="bi bi-funnel"></i>
+        Mostrando <strong>{{ total }}</strong> resultado(s) para
+        "<strong>{{ busca }}</strong>"
+    </p>
+{% endif %}
+
+{# ===== TABELA DE PRODUTOS ===== #}
+{% if produtos %}
+<div class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+        <thead class="table-dark">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Nome</th>
+                <th scope="col">SKU</th>
+                <th scope="col">Preço</th>
+                <th scope="col" class="text-center">Estoque</th>
+                <th scope="col">Localização</th>
+                <th scope="col">Cadastrado em</th>
+                <th scope="col" class="text-center">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+            {# Destaca em amarelo a linha de qualquer produto com estoque baixo #}
+            <tr class="{% if produto['quantidade'] < 10 %}table-warning{% endif %}">
+                <td class="text-muted">{{ produto['id'] }}</td>
+                <td class="fw-semibold">{{ produto['nome'] }}</td>
+                <td><code>{{ produto['sku'] }}</code></td>
+                <td>R$ {{ "%.2f"|format(produto['preco']) }}</td>
+                <td class="text-center">
+                    {% if produto['quantidade'] < 10 %}
+                        {# Badge vermelho + ícone de alerta para estoque baixo #}
+                        <span class="badge bg-danger rounded-pill">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            {{ produto['quantidade'] }}
+                        </span>
+                    {% elif produto['quantidade'] < 20 %}
+                        <span class="badge bg-warning text-dark rounded-pill">
+                            {{ produto['quantidade'] }}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-success rounded-pill">
+                            {{ produto['quantidade'] }}
+                        </span>
+                    {% endif %}
+                </td>
+                <td>{{ produto['localizacao'] or '—' }}</td>
+                {# Exibe apenas os primeiros 10 caracteres da data (YYYY-MM-DD) #}
+                <td class="text-muted small">
+                    {{ produto['data_adicao'][:10] if produto['data_adicao'] else '—' }}
+                </td>
+                <td class="text-center">
+                    {# Grupo de botões de ação #}
+                    <div class="btn-group btn-group-sm" role="group">
+                        {# Movimentar Estoque #}
+                        <a href="{{ url_for('main.transacao_estoque', id=produto['id']) }}"
+                           class="btn btn-outline-success"
+                           title="Movimentar Estoque">
+                            <i class="bi bi-arrow-left-right"></i>
+                        </a>
+
+                        {# Editar #}
+                        <a href="{{ url_for('main.editar_produto', id=produto['id']) }}"
+                           class="btn btn-outline-primary"
+                           title="Editar Produto">
+                            <i class="bi bi-pencil-fill"></i>
+                        </a>
+
+                        {# Excluir — chama confirmação JavaScript antes de submeter #}
+                        <button type="button"
+                                class="btn btn-outline-danger"
+                                title="Excluir Produto"
+                                onclick="confirmarExclusao({{ produto['id'] }}, '{{ produto['nome']|replace("'", "\\'") }}')">
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                    </div>
+
+                    {# Formulário oculto para exclusão via POST — um por linha #}
+                    <form id="form-deletar-{{ produto['id'] }}"
+                          action="{{ url_for('main.deletar_produto', id=produto['id']) }}"
+                          method="POST"
+                          style="display: none;">
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{# ===== PAGINAÇÃO ===== #}
+{% if total_paginas > 1 %}
+<nav aria-label="Navegação entre páginas" class="mt-3">
+    <ul class="pagination justify-content-center">
+
+        {# Botão Anterior #}
+        <li class="page-item {% if pagina == 1 %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('main.lista_produtos', pagina=pagina-1, q=busca) }}">
+                <i class="bi bi-chevron-left"></i> Anterior
+            </a>
+        </li>
+
+        {# Números de páginas #}
+        {% for p in range(1, total_paginas + 1) %}
+        <li class="page-item {% if p == pagina %}active{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('main.lista_produtos', pagina=p, q=busca) }}">
+                {{ p }}
+            </a>
+        </li>
+        {% endfor %}
+
+        {# Botão Próxima #}
+        <li class="page-item {% if pagina == total_paginas %}disabled{% endif %}">
+            <a class="page-link"
+               href="{{ url_for('main.lista_produtos', pagina=pagina+1, q=busca) }}">
+                Próxima <i class="bi bi-chevron-right"></i>
+            </a>
+        </li>
+
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+{# Estado vazio — nenhum produto encontrado #}
+<div class="text-center py-5">
+    <i class="bi bi-inbox display-1 text-muted"></i>
+    <p class="lead text-muted mt-3">
+        {% if busca %}
+            Nenhum produto encontrado para "<strong>{{ busca }}</strong>".
+        {% else %}
+            Nenhum produto cadastrado ainda.
+        {% endif %}
+    </p>
+    {% if not busca %}
+        <a href="{{ url_for('main.adicionar_produto') }}" class="btn btn-primary btn-lg">
+            <i class="bi bi-plus-circle"></i> Cadastrar primeiro produto
+        </a>
+    {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{# ===== SCRIPTS ESPECÍFICOS DESTA PÁGINA ===== #}
+{% block scripts %}
+<script>
+    /**
+     * Exibe uma caixa de confirmação nativa do navegador antes de excluir.
+     * Só submete o formulário oculto se o usuário confirmar.
+     */
+    function confirmarExclusao(id, nome) {
+        const confirmado = confirm(
+            `Tem certeza que deseja excluir o produto:\n\n"${nome}"?\n\nEsta ação não pode ser desfeita.`
+        );
+        if (confirmado) {
+            document.getElementById('form-deletar-' + id).submit();
+        }
+    }
+</script>
+{% endblock %}
